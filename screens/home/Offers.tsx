@@ -1,7 +1,7 @@
 import { StyleSheet, View } from "react-native";
 import { ChannelList } from "stream-chat-expo";
 import { useCallback, useEffect, useState } from "react";
-import { streamChatClient, supabase, theme, useAuthStore } from "@/globals";
+import { streamChatClient, supabase, theme, useAuthStore, usePurchaseStore, constants } from "@/globals";
 import RequiredAuthAlert from "@/components/RequiredAuthAlert";
 import { useNavigation } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
@@ -15,6 +15,8 @@ export default function Offers() {
   const [userCredentials, setUserCredentials] = useState<null | { id: string, token: string }>(null);
   const [connected, setConnected] = useState(false);
   const navigation = useNavigation<any>();
+  const setEventID = usePurchaseStore(state => state.setEventID);
+  const setOrderID = usePurchaseStore(state => state.setOrderID);
 
 
   // load user ID. this convoluted setup is needed so userID is accessible in the ChannelList component as well as when we're logging in.
@@ -80,9 +82,19 @@ export default function Offers() {
   }, [signedIn, userInfo, userCredentials]);
 
 
-  const handleSelect = useCallback(() => {
-    // todo - set purchase store data from channel info
-    // navigation.navigate('RequestOffer', { disconnectOnGoBack: false });
+  const handleSelect = useCallback((channel: any) => {
+    const eventID = channel?.data?.eventID;
+    const venueID = channel?.data?.venueID;
+    const orderID = channel?.data?.orderID ?? null;
+
+    if(eventID) {
+      setEventID(eventID);
+    }
+    if(orderID) {
+      setOrderID(orderID);
+    }
+
+    navigation.navigate('RequestOffer', { disconnectOnGoBack: false, venueID, eventID, orderID });
   }, []);
 
 
@@ -97,7 +109,6 @@ export default function Offers() {
   ), []);
 
 
-  // todo - setup sort (and security stuff?) for listing user's channels WHILE filtering out expired events
   return <View style={styles.container}>
     {
       !signedIn
@@ -106,7 +117,9 @@ export default function Offers() {
       ? null
       : <ChannelList
           filters={{
-            members: { $in: [userCredentials!.id] }
+            type: constants.streamChatChannelType,
+            members: { $in: [userCredentials!.id] },
+            eventEnd: { $gt: new Date().toISOString() }
           }}
           sort={{ last_message_at: -1 }}
           options={{ limit: 20, message_limit: 30 }}

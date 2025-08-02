@@ -57,7 +57,6 @@ export default function PurchaseConfirmed(props: { route: any }) {
   }, []);
 
 
-  // todo - implement the navigation once booking details is done
   const handleViewBookingDetails = useCallback(() => {
     if(finalized) {
       navigation.reset({

@@ -103,17 +103,27 @@ export default function BookingMoreDetails(props: { route: any }) {
       return;
     }
 
-    // todo - handle error state from this
-    const refundOrderRes = await fetch(endpoints.checkout.refundOrder, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session!.access_token}`
-      },
-      body: JSON.stringify({
-        orderID: orderID
-      })
-    });
+    let refundOrderRes: Response;
+    try {
+      refundOrderRes = await fetch(endpoints.checkout.refundOrder, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session!.access_token}`
+        },
+        body: JSON.stringify({
+          orderID: orderID
+        })
+      });
+    } catch (e) {
+      console.error(e);
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to refund order.'
+      });
+      setShowRefundSlideOver(false);
+      return;
+    }
 
     // hide slideover once done processing
     setShowRefundSlideOver(false);

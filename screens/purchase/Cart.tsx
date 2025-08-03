@@ -100,7 +100,6 @@ export default function Cart() {
       return;
     }
 
-    // todo - handle error state from this
     const preparePaymentRes = await fetch(endpoints.checkout.prepareOrderPayment, {
       method: 'POST',
       headers: {
@@ -111,6 +110,16 @@ export default function Cart() {
         orderID: orderID
       })
     });
+
+    if (!preparePaymentRes.ok) {
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to prepare order payment.'
+      });
+      console.error(await preparePaymentRes.text());
+      return;
+    }
+
     const { paymentIntentClientSecret, ephemeralKey, customer: stripeCustomerID }: { paymentIntentClientSecret: string, ephemeralKey: string, customer: string } = await preparePaymentRes.json();
 
 

@@ -1,6 +1,7 @@
 import { StyleSheet, View } from "react-native";
 import { ChannelList } from "stream-chat-expo";
 import { useCallback, useEffect, useState } from "react";
+
 import { streamChatClient, supabase, theme, useAuthStore, usePurchaseStore, constants } from "@/globals";
 import RequiredAuthAlert from "@/components/RequiredAuthAlert";
 import { useNavigation } from "@react-navigation/native";
@@ -14,6 +15,7 @@ export default function Offers() {
   const userInfo = useAuthStore(state => state.userInfo);
   const [userCredentials, setUserCredentials] = useState<null | { id: string, token: string }>(null);
   const [connected, setConnected] = useState(false);
+  const setEventID = usePurchaseStore(state => state.setEventID);
   const navigation = useNavigation<any>();
   const setEventID = usePurchaseStore(state => state.setEventID);
   const setOrderID = usePurchaseStore(state => state.setOrderID);
@@ -82,20 +84,26 @@ export default function Offers() {
   }, [signedIn, userInfo, userCredentials]);
 
 
-  const handleSelect = useCallback((channel: any) => {
-    const eventID = channel?.data?.eventID;
-    const venueID = channel?.data?.venueID;
-    const orderID = channel?.data?.orderID ?? null;
+const handleSelect = useCallback((channel: any) => {
+  // Use concise destructuring from the top snippet
+  const { eventID, venueID, orderID } = channel?.data ?? {};
 
-    if(eventID) {
-      setEventID(eventID);
-    }
-    if(orderID) {
-      setOrderID(orderID);
-    }
+  // Use the complete logic from the bottom snippet
+  if (eventID) {
+    setEventID(eventID);
+  }
+  if (orderID) {
+    setOrderID(orderID);
+  }
 
-    navigation.navigate('RequestOffer', { disconnectOnGoBack: false, venueID, eventID, orderID });
-  }, []);
+  navigation.navigate('RequestOffer', {
+    disconnectOnGoBack: false,
+    venueID,
+    eventID,
+    orderID,
+  });
+// Use a correct and complete dependency array
+}, [setEventID, setOrderID, navigation]);
 
 
   const renderEmptyState = useCallback(() => (

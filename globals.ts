@@ -328,14 +328,24 @@ export const usePurchaseStore = create<{
 )
 
 
+export type AuthRole = 'user' | 'vendor' | 'super-admin'
+
 export const useAuthFlowStore = create<{
   phoneNumber: string | null,
-  setPhoneNumber: (newPhoneNumber: string) => void
+  email: string | null,
+  role: AuthRole | null,
+  setPhoneNumber: (newPhoneNumber: string) => void,
+  setEmail: (newEmail: string) => void,
+  setRole: (role: AuthRole | null) => void,
 }>()(
   devtools(
     set => ({
       phoneNumber: null,
-      setPhoneNumber: newPhoneNumber => set({ phoneNumber: newPhoneNumber })
+      email: null,
+      role: null,
+      setPhoneNumber: newPhoneNumber => set({ phoneNumber: newPhoneNumber }),
+      setEmail: newEmail => set({ email: newEmail }),
+      setRole: role => set({ role })
     })
   ),
 )

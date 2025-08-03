@@ -1,7 +1,7 @@
 import { StyleSheet, View } from "react-native";
 import { ChannelList } from "stream-chat-expo";
 import { useCallback, useEffect, useState } from "react";
-import { streamChatClient, supabase, theme, useAuthStore } from "@/globals";
+import { streamChatClient, supabase, theme, useAuthStore, usePurchaseStore } from "@/globals";
 import RequiredAuthAlert from "@/components/RequiredAuthAlert";
 import { useNavigation } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
@@ -14,6 +14,7 @@ export default function Offers() {
   const userInfo = useAuthStore(state => state.userInfo);
   const [userCredentials, setUserCredentials] = useState<null | { id: string, token: string }>(null);
   const [connected, setConnected] = useState(false);
+  const setEventID = usePurchaseStore(state => state.setEventID);
   const navigation = useNavigation<any>();
 
 
@@ -80,10 +81,13 @@ export default function Offers() {
   }, [signedIn, userInfo, userCredentials]);
 
 
-  const handleSelect = useCallback(() => {
-    // todo - set purchase store data from channel info
-    // navigation.navigate('RequestOffer', { disconnectOnGoBack: false });
-  }, []);
+  const handleSelect = useCallback((channel: any) => {
+    const { eventID, venueID, orderID } = channel?.data ?? {};
+    if(eventID) {
+      setEventID(eventID);
+    }
+    navigation.navigate('RequestOffer', { disconnectOnGoBack: false, venueID, eventID, orderID });
+  }, [setEventID, navigation]);
 
 
   const renderEmptyState = useCallback(() => (

@@ -1,5 +1,5 @@
 import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
-import { endpoints, supabase, useAuthFlowStore, useAuthStore } from "@/globals";
+import { supabase, useAuthFlowStore, useAuthStore } from "@/globals";
 import { StackActions, useNavigation } from "@react-navigation/native";
 import AppText from "@/components/AppText";
 import AppSafeAreaView from "@/components/AppSafeAreaView";
@@ -23,19 +23,9 @@ export default function VerifyPhoneNumber() {
 
   // send phone number verification
   const sendCode = async () => {
-    const res = await fetch(endpoints.auth.initPhoneVerification, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        phoneNumber: phoneNumber
-      })
-    });
-
-    if(res.status !== 200) {
+    const { error } = await supabase.auth.signInWithOtp({ phone: phoneNumber! });
+    if (error) {
       setErrorMessage('Failed to send code. Please try again later.');
-      return;
     }
   };
 
@@ -63,75 +53,33 @@ export default function VerifyPhoneNumber() {
     console.log("ENTERED");
     setIsProcessing(true);
 
-    const res = await fetch(endpoints.auth.createSession, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        phoneNumber: phoneNumber,
-        code: code
-      })
-    });
-
-    const text = await res.text();
-    setTimeout(() => {
-      setIsProcessing(false);
-    }, 500);
-    if(res.status === 400 && text === 'Wrong code') {
+    const { data, error } = await supabase.auth.verifyOtp({ phone: phoneNumber!, token: code, type: 'sms' });
+    setIsProcessing(false);
+    if (error || !data?.user) {
       Toast.show({
         type: 'error',
-        text1: 'Incorrect code.'
+        text1: 'Failed to verify code.'
       });
+      return;
     }
-    else if(res.status !== 200) {
-      console.error(text);
+
+    // fetch user data
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('id, firstName, lastName, phoneNumber, email, dateOfBirth, streamChatToken')
+      .single();
+    if(userError) {
       Toast.show({
         type: 'error',
-        text1: 'Failed to verify code. Please try again later.'
+        text1: 'Failed to fetch user data.'
       });
+      return;
     }
-
-    // success! set session and refresh tokens
-    else {
-      const data: { password: string, needsPopulation: boolean } = JSON.parse(text);
-
-      // sign in with supabase
-      const { error: userError } = await supabase.auth.signInWithPassword({ email: `${phoneNumber}@dummy.null`, password: data.password });
-      if(userError) {
-        console.error(userError);
-        Toast.show({
-          type: 'error',
-          text1: 'Failed to sign in user.'
-        });
-        return;
-      }
-
-      // populate, if necessary
-      if(!data.needsPopulation) {
-        // if user was already populated, we still need to fetch these details to sign in client-side
-        const { data, error } = await supabase
-          .from('users')
-          .select('id, firstName, lastName, phoneNumber, email, dateOfBirth, streamChatToken')
-          .single();
-        if(error) {
-          console.error(error);
-          Toast.show({
-            type: 'error',
-            text1: 'Failed to fetch user data.'
-          });
-          return;
-        }
-
-        if(data !== null && data.email !== null && data.firstName !== null && data.lastName !== null && data.dateOfBirth !== null) {
-          signIn({ id: data.id, email: data.email, firstName: data.firstName, lastName: data.lastName, dateOfBirth: data.dateOfBirth, phoneNumber: data.phoneNumber, streamChatToken: data.streamChatToken });
-          const leaveAuthStack = StackActions.pop(2);
-          navigation.dispatch(leaveAuthStack);
-          return;
-        }
-      }
-
-      // if we got here, that means that the user needs population
+    if(userData && userData.email && userData.firstName && userData.lastName && userData.dateOfBirth) {
+      signIn({ id: userData.id, email: userData.email, firstName: userData.firstName, lastName: userData.lastName, dateOfBirth: userData.dateOfBirth, phoneNumber: userData.phoneNumber, streamChatToken: userData.streamChatToken });
+      const leaveAuthStack = StackActions.pop(2);
+      navigation.dispatch(leaveAuthStack);
+    } else {
       navigation.navigate('UserDetails');
     }
   };

@@ -16,7 +16,7 @@ export default function PurchaseConfirmed(props: { route: any }) {
   const [finalized, setFinalized] = useState(false);
   const animationRef = useRef<LottieView>(null);
   const checkFinalizedInterval = useRef(500);
-  const timeoutID = useRef<null | NodeJS.Timeout>(null);
+  const timeoutID = useRef<null | ReturnType<typeof setTimeout>>(null);
 
 
   // wait for order

@@ -48,6 +48,7 @@
     "expo-system-ui": "~5.0.9",
     "expo-web-browser": "~14.2.0",
     "libphonenumber-js": "^1.12.9",
+    "react-native-phone-number-input": "^2.1.0",
     "lottie-react-native": "^7.2.3",
     "react": "19.0.0",
     "react-dom": "19.0.0",

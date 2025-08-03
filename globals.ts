@@ -22,8 +22,8 @@ const ExpoSecureStoreAdapter = {
   },
 }
 
-const supabaseUrl = "https://lafokgenyynjprbkpjvb.supabase.co";
-const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxhZm9rZ2VueXluanByYmtwanZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODU5OTMyOTYsImV4cCI6MjAwMTU2OTI5Nn0.JxnJezoIzolsFepBqddmYpOkhPYQK0wmKKS5fymAQ6Q";
+const supabaseUrl = process.env.SUPABASE_URL as string;
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY as string;
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     storage: ExpoSecureStoreAdapter,
@@ -328,14 +328,24 @@ export const usePurchaseStore = create<{
 )
 
 
+export type AuthRole = 'user' | 'vendor' | 'super-admin'
+
 export const useAuthFlowStore = create<{
   phoneNumber: string | null,
-  setPhoneNumber: (newPhoneNumber: string) => void
+  email: string | null,
+  role: AuthRole | null,
+  setPhoneNumber: (newPhoneNumber: string) => void,
+  setEmail: (newEmail: string) => void,
+  setRole: (role: AuthRole | null) => void,
 }>()(
   devtools(
     set => ({
       phoneNumber: null,
-      setPhoneNumber: newPhoneNumber => set({ phoneNumber: newPhoneNumber })
+      email: null,
+      role: null,
+      setPhoneNumber: newPhoneNumber => set({ phoneNumber: newPhoneNumber }),
+      setEmail: newEmail => set({ email: newEmail }),
+      setRole: role => set({ role })
     })
   ),
 )

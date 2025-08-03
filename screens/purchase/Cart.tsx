@@ -121,7 +121,7 @@ export default function Cart() {
       return;
     }
 
-    if (preparePaymentRes.status !== 200) {
+    if(preparePaymentRes.status !== 200) {
       console.error(await preparePaymentRes.text());
       Toast.show({
         type: 'error',
@@ -218,7 +218,7 @@ export default function Cart() {
   // handles user details button interaction
   const handleBuyerDetails = useCallback(async () => {
     if(signedIn) {
-      navigation.navigate('SettingsProfile');
+      navigation.navigate('SettingsStack', { screen: 'SettingsProfile' });
     }
     else {
       navigation.navigate('PhoneNumber');

@@ -182,7 +182,7 @@ export default function App() {
       style={{ backgroundColor: theme.color.bg }}
       onLayout={onLayoutRootView}
     >
-      <UniversalStripeProvider publishableKey={'pk_live_IGqfybsjMLQbjecJ1XwI8zvM'}>
+      <UniversalStripeProvider>
         <OverlayProvider value={{ style: chatTheme }}>
           <Chat client={streamChatClient}>
             <NavigationContainer theme={navTheme}>

@@ -100,17 +100,36 @@ export default function Cart() {
       return;
     }
 
-    // todo - handle error state from this
-    const preparePaymentRes = await fetch(endpoints.checkout.prepareOrderPayment, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session!.access_token}`
-      },
-      body: JSON.stringify({
-        orderID: orderID
-      })
-    });
+    let preparePaymentRes: Response;
+    try {
+      preparePaymentRes = await fetch(endpoints.checkout.prepareOrderPayment, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session!.access_token}`
+        },
+        body: JSON.stringify({
+          orderID: orderID
+        })
+      });
+    } catch (e) {
+      console.error(e);
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to prepare order payment.'
+      });
+      return;
+    }
+
+    if(preparePaymentRes.status !== 200) {
+      console.error(await preparePaymentRes.text());
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to prepare order payment.'
+      });
+      return;
+    }
+
     const { paymentIntentClientSecret, ephemeralKey, customer: stripeCustomerID }: { paymentIntentClientSecret: string, ephemeralKey: string, customer: string } = await preparePaymentRes.json();
 
 
@@ -199,7 +218,7 @@ export default function Cart() {
   // handles user details button interaction
   const handleBuyerDetails = useCallback(async () => {
     if(signedIn) {
-      // todo - link this to a "user details only" screen
+      navigation.navigate('SettingsStack', { screen: 'SettingsProfile' });
     }
     else {
       navigation.navigate('PhoneNumber');

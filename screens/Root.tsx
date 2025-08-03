@@ -1,8 +1,11 @@
 import AppText from "@/components/AppText";
 import { theme, useAuthStore, useStore, version } from "@/globals";
+import SelectRole from "@/screens/auth/SelectRole";
 import PhoneNumber from "@/screens/auth/PhoneNumber";
-import UserDetails from "@/screens/auth/UserDetails";
 import VerifyPhoneNumber from "@/screens/auth/VerifyPhoneNumber";
+import Email from "@/screens/auth/Email";
+import VerifyEmail from "@/screens/auth/VerifyEmail";
+import UserDetails from "@/screens/auth/UserDetails";
 import BookingBreakdown from "@/screens/booking/BookingBreakdown";
 import BookingDetail from "@/screens/booking/BookingDetail";
 import BookingMoreDetails from "@/screens/booking/BookingMoreDetails";
@@ -70,9 +73,12 @@ export default function Root() {
     <Stack.Screen name={'BookingBreakdown'} component={BookingBreakdown} />
     <Stack.Screen name={'PurchasePolicy'} component={PurchasePolicy} />
 
-    {/* user info collection flow screens */}
+    {/* auth screens */}
+    <Stack.Screen name={'SelectRole'} component={SelectRole} />
     <Stack.Screen name={'PhoneNumber'} component={PhoneNumber} />
     <Stack.Screen name={'VerifyPhoneNumber'} component={VerifyPhoneNumber} />
+    <Stack.Screen name={'Email'} component={Email} />
+    <Stack.Screen name={'VerifyEmail'} component={VerifyEmail} />
     <Stack.Screen name={'UserDetails'} component={UserDetails} />
   </Stack.Navigator>, []);
 
@@ -114,7 +120,7 @@ export default function Root() {
           }
           else {
             props.navigation.navigate('MainStack');
-            props.navigation.navigate('MainStack', { screen: 'PhoneNumber' })
+            props.navigation.navigate('MainStack', { screen: 'SelectRole' })
             props.navigation.closeDrawer();
           }
         }}

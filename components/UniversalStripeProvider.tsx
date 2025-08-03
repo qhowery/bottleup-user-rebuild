@@ -15,7 +15,7 @@ if (Platform.OS !== 'web') {
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 
-const stripePromise = loadStripe('YOUR_STRIPE_PUBLIC_KEY_HERE');
+const stripePromise = loadStripe(process.env.STRIPE_PUBLIC_KEY_WEB as string);
 
 type Props = {
   children: React.ReactNode;
@@ -28,7 +28,7 @@ export default function UniversalStripeProvider({ children }: Props) {
 
   if (StripeProviderNative) {
     return (
-      <StripeProviderNative publishableKey="pk_live_IGqfybsjMLQbjecJ1XwI8zvM">
+      <StripeProviderNative publishableKey={process.env.STRIPE_PUBLIC_KEY_NATIVE as string}>
         {children}
       </StripeProviderNative>
     );
